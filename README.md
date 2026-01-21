@@ -116,8 +116,7 @@ This project is developed as part of EFREI M1 Data Engineering - Generative AI c
 
 ## 👥 Authors
 
-- **Héctor** - EFREI M1 Data Engineering
-- **Simone** - Repository Maintainer
+- **Maharo** - **Simone** - EFREI M1 Data Engineering
 
 ## 🙏 Acknowledgments
 

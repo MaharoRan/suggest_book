@@ -65,7 +65,7 @@ requirements.txt    → Dépendances Python
 La clé API Gemini est codée en dur dans `app.py` :
 
 ```python
-api_key = "AIzaSyCCYvbg2hvr-Qz-D81pEn0UU3Bjv0Fjvnw"
+api_key = "votre_clé"
 ```
 
 Pour utiliser une variable d'environnement :
