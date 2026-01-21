@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recommandation Littéraire - EFREI</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        color: #667eea;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 2em;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 0.9em;
+      }
+
+      .section {
+        margin-bottom: 30px;
+      }
+
+      .section-title {
+        color: #764ba2;
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #667eea;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1em;
+        transition: border-color 0.3s;
+      }
+
+      input[type="text"]:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .likert-group {
+        margin-bottom: 25px;
+      }
+
+      .likert-label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .likert-scale {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .likert-option {
+        flex: 1;
+        text-align: center;
+      }
+
+      .likert-option input[type="radio"] {
+        display: none;
+      }
+
+      .likert-option label {
+        display: block;
+        padding: 15px 10px;
+        background: #f5f5f5;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 500;
+      }
+
+      .likert-option input[type="radio"]:checked + label {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: scale(1.05);
+      }
+
+      .likert-option label:hover {
+        border-color: #667eea;
+        background: #f0f3ff;
+      }
+
+      .likert-legend {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 0.85em;
+        color: #666;
+      }
+
+      button {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      #results {
+        margin-top: 40px;
+        display: none;
+      }
+
+      .summary-box {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border-left: 4px solid #667eea;
+      }
+
+      .summary-title {
+        color: #667eea;
+        font-size: 1.2em;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .book-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+      }
+
+      .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .book-rank {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .book-title {
+        color: #333;
+        font-size: 1.3em;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .book-genre {
+        color: #764ba2;
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+
+      .book-score {
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .book-description {
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        display: none;
+      }
+
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error-box {
+        background: #ffe0e0;
+        border-left: 4px solid #ff4444;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 20px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📚 Recommandation Littéraire</h1>
+      <p class="subtitle">
+        Système de recommandation sémantique - EFREI M1 Data Engineering
+      </p>
+
+      <form id="questionnaireForm">
+        <!-- Questions Ouvertes -->
+        <div class="section">
+          <div class="section-title">Questions Ouvertes</div>
+
+          <div class="form-group">
+            <label for="description"
+              >1. Décrivez le livre que vous recherchez en plusieurs phrases. Le plus de détails possible. Vous pouvez également mentionner des thèmes, des ambiances ou des émotions spécifiques. Aussi un style d'écriture préféré ou un pharagraphe complet comme example.</label
+            >
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Ex: Un thriller psychologique avec suspense, ambiance sombre..."
+            >
+Une romance contemporaine avec une histoire d'amour passionnée, des personnages attachants et une fin heureuse</textarea
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="favorite_books"
+              >2. Citez vos livres préférés de laquelle se baser pour cette recherche (séparés par des virgules)</label
+            >
+            <input
+              type="text"
+              id="favorite_books"
+              name="favorite_books"
+              placeholder="Ex: Gone Girl, The Silent Patient"
+              value="Pride and Prejudice, The Notebook, Me Before You"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="avoid"
+              >3. Quels genres ou thèmes souhaitez-vous éviter ?</label
+            >
+            <input
+              type="text"
+              id="avoid"
+              name="avoid"
+              placeholder="Ex: Romance, Science-fiction"
+              value="Horreur, Violence"
+            />
+          </div>
+        </div>
+
+        <!-- Questions Likert -->
+        <div class="section">
+          <div class="section-title">Préférences (Échelle 1-5)</div>
+
+          <div class="likert-group">
+            <span class="likert-label"
+              >4. Intensité d'action/suspense souhaitée</span
+            >
+            <div class="likert-scale">
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="action1"
+                  name="intensity_action"
+                  value="1"
+                />
+                <label for="action1">1</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="action2"
+                  name="intensity_action"
+                  value="2"
+                  checked
+                />
+                <label for="action2">2</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="action3"
+                  name="intensity_action"
+                  value="3"
+                />
+                <label for="action3">3</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="action4"
+                  name="intensity_action"
+                  value="4"
+                />
+                <label for="action4">4</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="action5"
+                  name="intensity_action"
+                  value="5"
+                />
+                <label for="action5">5</label>
+              </div>
+            </div>
+            <div class="likert-legend">
+              <span>Pas du tout</span>
+              <span>Énormément</span>
+            </div>
+          </div>
+
+          <div class="likert-group">
+            <span class="likert-label"
+              >5. Intérêt pour les histoires romantiques</span
+            >
+            <div class="likert-scale">
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="romance1"
+                  name="intensity_romance"
+                  value="1"
+                />
+                <label for="romance1">1</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="romance2"
+                  name="intensity_romance"
+                  value="2"
+                />
+                <label for="romance2">2</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="romance3"
+                  name="intensity_romance"
+                  value="3"
+                />
+                <label for="romance3">3</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="romance4"
+                  name="intensity_romance"
+                  value="4"
+                />
+                <label for="romance4">4</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="romance5"
+                  name="intensity_romance"
+                  value="5"
+                  checked
+                />
+                <label for="romance5">5</label>
+              </div>
+            </div>
+            <div class="likert-legend">
+              <span>Pas du tout</span>
+              <span>Énormément</span>
+            </div>
+          </div>
+
+          <div class="likert-group">
+            <span class="likert-label"
+              >6. Importance de l'aspect éducatif/apprentissage</span
+            >
+            <div class="likert-scale">
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="learning1"
+                  name="intensity_learning"
+                  value="1"
+                />
+                <label for="learning1">1</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="learning2"
+                  name="intensity_learning"
+                  value="2"
+                  checked
+                />
+                <label for="learning2">2</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="learning3"
+                  name="intensity_learning"
+                  value="3"
+                />
+                <label for="learning3">3</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="learning4"
+                  name="intensity_learning"
+                  value="4"
+                />
+                <label for="learning4">4</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="learning5"
+                  name="intensity_learning"
+                  value="5"
+                />
+                <label for="learning5">5</label>
+              </div>
+            </div>
+            <div class="likert-legend">
+              <span>Pas du tout</span>
+              <span>Énormément</span>
+            </div>
+          </div>
+
+          <div class="likert-group">
+            <span class="likert-label"
+              >7. Niveau de complexité narrative souhaité</span
+            >
+            <div class="likert-scale">
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="complexity1"
+                  name="complexity"
+                  value="1"
+                />
+                <label for="complexity1">1</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="complexity2"
+                  name="complexity"
+                  value="2"
+                />
+                <label for="complexity2">2</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="complexity3"
+                  name="complexity"
+                  value="3"
+                  checked
+                />
+                <label for="complexity3">3</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="complexity4"
+                  name="complexity"
+                  value="4"
+                />
+                <label for="complexity4">4</label>
+              </div>
+              <div class="likert-option">
+                <input
+                  type="radio"
+                  id="complexity5"
+                  name="complexity"
+                  value="5"
+                />
+                <label for="complexity5">5</label>
+              </div>
+            </div>
+            <div class="likert-legend">
+              <span>Très simple</span>
+              <span>Très complexe</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn">
+          Obtenir mes recommandations
+        </button>
+      </form>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px; color: #667eea; font-weight: 600">
+          Analyse en cours...
+        </p>
+      </div>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <div id="results">
+        <div class="summary-box" id="summaryBox">
+          <div class="summary-title">💡 Synthèse Personnalisée</div>
+          <p id="summaryText"></p>
+        </div>
+
+        <div class="section-title">🏆 Top 3 Recommandations</div>
+        <div id="booksList"></div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("questionnaireForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          // Cacher les erreurs précédentes
+          document.getElementById("errorBox").style.display = "none";
+          document.getElementById("results").style.display = "none";
+
+          // Afficher le loading
+          document.getElementById("loading").style.display = "block";
+          document.getElementById("submitBtn").disabled = true;
+
+          // Récupérer les données du formulaire
+          const formData = new FormData(e.target);
+
+          try {
+            const response = await fetch("/recommend", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              // Afficher la synthèse
+              document.getElementById("summaryText").textContent = data.summary;
+
+              // Afficher les recommandations
+              const booksList = document.getElementById("booksList");
+              booksList.innerHTML = "";
+
+              data.recommendations.forEach((book) => {
+                const bookCard = document.createElement("div");
+                bookCard.className = "book-card";
+                bookCard.innerHTML = `
+                            <span class="book-rank">#${book.rank}</span>
+                            <div class="book-title">${book.title}</div>
+                            <div class="book-genre">📖 ${book.genre}</div>
+                            <div class="book-score">⭐ Score: ${book.percentage.toFixed(
+                              2
+                            )}%</div>
+                            <div class="book-description">${
+                              book.description
+                            }</div>
+                        `;
+                booksList.appendChild(bookCard);
+              });
+
+              // Afficher les résultats
+              document.getElementById("results").style.display = "block";
+
+              // Scroller vers les résultats
+              document
+                .getElementById("results")
+                .scrollIntoView({ behavior: "smooth" });
+            } else {
+              throw new Error(data.error || "Erreur inconnue");
+            }
+          } catch (error) {
+            const errorBox = document.getElementById("errorBox");
+            errorBox.textContent = `Erreur: ${error.message}`;
+            errorBox.style.display = "block";
+          } finally {
+            // Cacher le loading
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("submitBtn").disabled = false;
+          }
+        });
+    </script>
+  </body>
+</html>
